@@ -8,75 +8,67 @@
             class="demo-ruleForm"
             label-position="left"
         >
-            <el-form-item label="日期" prop="date">
+            <el-form-item label="日期" prop="createTime">
                 <el-col :span="11">
-                    <el-form-item prop="date">
+                    <el-form-item prop="createTime">
                         <el-date-picker
                             type="date"
                             placeholder="选择日期"
-                            v-model="ruleForm.date"
+                            v-model="ruleForm.createTime"
                             style="width: 100%;"
                         ></el-date-picker>
                     </el-form-item>
                 </el-col>
             </el-form-item>
-            <el-form-item label="咨询产品" prop="production">
-                <el-input v-model="ruleForm.production"></el-input>
+            <el-form-item label="咨询产品" prop="productName">
+                <el-input v-model="ruleForm.productName"></el-input>
             </el-form-item>
-            <el-form-item label="服务来源" prop="service">
-                <el-select v-model="ruleForm.service" placeholder="请选择服务来源">
+            <el-form-item label="服务来源" prop="serviceSource">
+                <el-select v-model="ruleForm.serviceSource" placeholder="请选择服务来源">
                     <el-option label="产品服务中台_oa" value="oa"></el-option>
                     <el-option label="84710000热线" value="phone"></el-option>
                 </el-select>
             </el-form-item>
-            <el-form-item label="来源时间" prop="date1">
-                <el-date-picker
-                    type="datetime"
-                    placeholder="选择日期时间"
-                    v-model="ruleForm.date1"
-                    default-time="12:00:00"
-                ></el-date-picker>
-            </el-form-item>
-            <el-form-item label="名称" prop="serviceName">
+            <el-form-item label="名称" prop="serverName">
                 <el-input
-                    v-model="ruleForm.serviceName"
+                    v-model="ruleForm.serverName"
                     :placeholder="ruleForm.service=='oa'?'请填写oa站点名称':(ruleForm.service=='phone'?'请填写反馈用户电话':'')"
                 ></el-input>
             </el-form-item>
-            <el-form-item label="姓名" prop="name">
-                <el-input v-model="ruleForm.name"></el-input>
+            <el-form-item label="姓名" prop="clientName">
+                <el-input v-model="ruleForm.clientName"></el-input>
             </el-form-item>
-            <el-form-item label="职位" prop="career">
-                <el-input v-model="ruleForm.career"></el-input>
+            <el-form-item label="职位" prop="clientPosition">
+                <el-input v-model="ruleForm.clientPosition"></el-input>
             </el-form-item>
-            <el-form-item label="分公司" prop="company">
+            <el-form-item label="分公司" prop="clientCompany">
                 <!-- <el-input v-model="ruleForm.company"></el-input> -->
                 <el-cascader
-                    :options="company"
+                    :options="clientCompany"
                     clearable
                     :props="{ expandTrigger: 'hover' }"
-                    v-model="ruleForm.company"
+                    v-model="ruleForm.clientCompany"
                 ></el-cascader>
             </el-form-item>
-            <el-form-item label="服务类型" prop="type">
+            <el-form-item label="服务类型" prop="serviceType">
                 <el-cascader
                     :options="options"
                     clearable
                     :props="{ expandTrigger: 'hover' }"
-                    v-model="ruleForm.type"
+                    v-model="ruleForm.serviceType"
                 ></el-cascader>
             </el-form-item>
-            <el-form-item label="具体内容" prop="desc">
-                <el-input type="textarea" v-model="ruleForm.desc"></el-input>
+            <el-form-item label="具体内容" prop="detailContent">
+                <el-input type="textarea" v-model="ruleForm.detailContent"></el-input>
             </el-form-item>
-            <el-form-item label="是否解决" prop="solve">
-                <el-switch v-model="ruleForm.solve"></el-switch>
+            <el-form-item label="是否解决" prop="status">
+                <el-switch v-model="ruleForm.status"></el-switch>
             </el-form-item>
-            <el-form-item label="回复时间" prop="replytTime" v-if="this.ruleForm.solve == false">
+            <el-form-item label="回复时间" prop="deadline" v-if="this.ruleForm.status == false">
                 <el-date-picker
                     type="datetime"
                     placeholder="选择日期时间"
-                    v-model="ruleForm.replytTime"
+                    v-model="ruleForm.deadline"
                     default-time="12:00:00"
                 ></el-date-picker>
             </el-form-item>
@@ -94,77 +86,69 @@ export default {
     data() {
         return {
             ruleForm: {
-                date: new Date(),
-                service: "",
-                name: "",
-                serviceName: "",
-                production: "",
-                career: "",
-                company: "",
-                desc: "",
-                solve: false,
-                date1: "",
-                type: "",
-                replytTime: ""
+                createTime: new Date(),
+                serviceSource: "",
+                clientName: "",
+                serverName: "",
+                productName: "",
+                clientPosition: "",
+                clientCompany: "",
+                detailContent: "",
+                status: false,
+                serviceType: "",
+                deadline: ""
             },
             rules: {
-                date: [
+                createTime: [
                     {
                         required: true,
                         message: "请选择日期",
                         trigger: "change"
                     }
                 ],
-                service: [
+                serviceSource: [
                     {
                         required: true,
                         message: "请选择服务来源",
                         trigger: "change"
                     }
                 ],
-                name: [
+                clientName: [
                     {
                         required: true,
                         message: "请输入姓名",
                         trigger: "blur"
                     }
                 ],
-                date1: [
-                    {
-                        required: true,
-                        message: "请输入来源时间",
-                        trigger: "change"
-                    }
-                ],
-                serviceName: [
+                serverName: [
                     {
                         required: true,
                         message: "请输入服务名称",
                         trigger: "blur"
                     }
                 ],
-                production: [
+                productName: [
                     {
                         required: true,
                         message: "请输入咨询产品",
                         trigger: "blur"
                     }
                 ],
-                career: [
+                clientPosition: [
                     {
                         required: true,
                         message: "请输入职位",
                         trigger: "blur"
                     }
                 ],
-                company: [
+                clientCompany: [
                     {
                         required: true,
                         message: "请选择分公司名称",
                         trigger: "change"
                     }
                 ],
-                type: [
+                serviceType: [
                     {
                         type: "array",
                         required: true,
@@ -172,14 +156,14 @@ export default {
                         trigger: "change"
                     }
                 ],
-                desc: [
+                detailContent: [
                     {
                         required: true,
                         message: "请填写具体内容描述",
                         trigger: "blur"
                     }
                 ],
-                replytTime: [
+                deadline: [
                     {
                         required: true,
                         message: "请填写回复时间",
@@ -187,7 +171,7 @@ export default {
                     }
                 ]
             },
-            company: [
+            clientCompany: [
                 {
                     value: "省公司本部",
                     label: "省公司本部"
@@ -460,42 +444,67 @@ export default {
         };
     },
     methods: {
-        // submitForm(formName) {
-        //     this.$refs[formName].validate(valid => {
-        //         if (valid) {
-        //             console.log(this.ruleForm.type.join("/"));
-        //             this.$post("", {})
-        //                 .then(response => {
-        //                     if (response.code == 200) {
-        //                         this.$message({
-        //                             message: "提交成功!",
-        //                             type: "success"
-        //                         });
-        //                     } else {
-        //                         this.$message({
-        //                             message: "提交失败!",
-        //                             type: "error"
-        //                         });
-        //                     }
-        //                 })
-        //                 .catch(err => {
-        //                     this.$message({
-        //                         message: "请求数据失败",
-        //                         type: "error"
-        //                     });
-        //                 });
-        //         } else {
-        //             this.$message({
-        //                 message: "提交失败，请确认信息填写完整!",
-        //                 type: "warning"
-        //             });
-        //             return false;
-        //         }
-        //     });
-        // },
+        submitForm(formName) {
+            console.log(this.$moment(this.ruleForm.createTime).format("YYYY-MM-DD HH:mm:ss"));
+            if(this.ruleForm.deadline){
+                this.ruleForm.deadline = this.$moment(this.ruleForm.deadline).format("YYYY-MM-DD HH:mm:ss")
+            }else(
+                this.ruleForm.deadline = ""
+            )
+            this.$refs[formName].validate(valid => {
+                if (valid) {
+                    if (this.ruleForm.status == false) {
+                        this.ruleForm.status = 0;
+                    } else {
+                        this.ruleForm.status = 1;
+                    }
+                    console.log(this.ruleForm.status);
+                    this.$ppost("/updateOrSaveSrvOrder", {
+                        createTime: this.$moment(this.ruleForm.createTime).format("YYYY-MM-DD HH:mm:ss"),
+                        productName: this.ruleForm.productName,
+                        serviceSource: this.ruleForm.serviceSource,
+                        serverName: this.ruleForm.serverName,
+                        clientName: this.ruleForm.clientName,
+                        clientPosition: this.ruleForm.clientPosition,
+                        clientCompany: this.ruleForm.clientCompany.toString(),
+                        serviceType: this.ruleForm.serviceType.join("/"),
+                        detailContent: this.ruleForm.detailContent,
+                        status: this.ruleForm.status,
+                        deadline: this.ruleForm.deadline
+                        })
+                        .then(response => {
+                            console.log(response)
+                            if (response ==  'SUCCESS') {
+                                this.$message({
+                                    message: "提交成功!",
+                                    type: "success"
+                                });
+                            } else {
+                                this.$message({
+                                    message: "提交失败!",
+                                    type: "error"
+                                });
+                            }
+                        })
+                        .catch(err => {
+                            console.log(err);
+                            this.$message({
+                                message: "请求数据失败",
+                                type: "error"
+                            });
+                        });
+                } else {
+                    this.$message({
+                        message: "提交失败，请确认信息填写完整!",
+                        type: "warning"
+                    });
+                    return false;
+                }
+            });
+        },
         resetForm(formName) {
             this.$refs[formName].resetFields();
-        }
+        },
     }
 };
 </script>

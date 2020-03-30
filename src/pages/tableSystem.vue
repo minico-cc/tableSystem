@@ -36,12 +36,11 @@ export default {
     data() {
         return {
             activeIndex: this.$route.name,
-            pending: 3
+            pending: 0
         };
     },
-    created() {
-        this.userName = sessionStorage.getItem("username");
-        // console.log(sessionStorage.getItem('userRole'))
+    created() {       
+        this.getBadge()
     },
     methods: {
       toIndex() {
@@ -58,8 +57,29 @@ export default {
         },
         toHistory() {
             this.$router.push("/history");
+        },
+        getBadge(){
+            this.$get("/getStatusStatistics")
+        .then(response => {
+          if(response.code == 1000){
+            this.pending = response.data.pendingOrder
+          }else{
+              this.$message({
+                        message : "请求错误",
+                        type : "error"
+                    })
+          }
+        })
+        .catch( err => {
+            console.log(err)
+            this.$message({
+                        message : "请求失败",
+                        type : "error"
+                    })
+        })
         }
-    }
+    },
+    
 };
 </script>
 

@@ -1,14 +1,12 @@
 import axios from "axios";
-// import QS from 'qs';
+import QS from 'qs';
 import { Loading } from 'element-ui';
-axios.defaults.baseURL = 'http://118.31.236.49:7901/export'
-axios.defaults.timeout =  10 * 1000;
-axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded; charset=utf-8';
 // axios.defaults.withCredentials = true;
 
 const ajax = axios.create({
-    baseURL: "http://118.31.236.49:7901/export", //这里引入后端接口地址
-    headers: { "Content-Type": "application/x-www-form-urlencoded; charset=utf-8"}
+    baseURL: "./wosys/srvOrder", //这里引入后端接口地址
+    // headers: { "Content-Type": "application/x-www-form-urlencoded; charset=utf-8"},
+    timeout: 10 * 1000
   });
 
 
@@ -21,10 +19,12 @@ ajax.interceptors.request.use(config => {
     return Promise.reject(error);
   });
 
+  // let loadingInstance = Loading.service("加载中...");
   ajax.interceptors.response.use(resp => {
-    // Loading.close();
-    // console.log(resp)
-    if (resp.code == 200) {
+    
+    // loadingInstance.close();
+    console.log(resp)
+    if (resp.status == 200) {
       return resp;
     } else {
       this.$message({
@@ -47,7 +47,7 @@ export function get(url,params={}){
     target: document.querySelector('.el-container')
 });
   return new Promise((resolve,reject) => {
-    axios.get(url,{
+    ajax.get(url,{
       params:encodeURIComponent(params)
     })
     .then(response => {
@@ -71,14 +71,50 @@ export function get(url,params={}){
 
  export function post(url,data = {}){
    return new Promise((resolve,reject) => {
-     axios.post(url,data)
+     ajax.post(url,QS.stringify(data))
           .then(response => {
             resolve(response.data);
-          },err => {
+          }).catch(err => {
             reject(err)
           })
    })
  }
+
+/**
+ * 封装post请求
+ * @param url 请求的url地址
+ * @param data 请求时携带的参数
+ * @returns {Promise}
+ */
+
+export function ppost(url,data = {}){
+  return new Promise((resolve,reject) => {
+    ajax.post(url,data)
+         .then(response => {
+           resolve(response.data);
+         }).catch(err => {
+           reject(err)
+         })
+  })
+}
+
+/**
+ * 封装post请求
+ * @param url 请求的url地址
+ * @param data 请求时携带的参数
+ * @returns {Promise}
+ */
+
+export function pppost(url,data = {}){
+  return new Promise((resolve,reject) => {
+    ajax.post(url,QS.stringify(data),{responseType: 'blob'})
+         .then(response => {
+           resolve(response.data);
+         }).catch(err => {
+           reject(err)
+         })
+  })
+}
 
 /**
  * 封装delete请求
@@ -89,7 +125,7 @@ export function get(url,params={}){
 
  export function deleteInfo(url,data={}){
   return new Promise((resolve,reject) => {
-    axios.delete(url,data)
+    ajax.delete(url,data)
     .then(response => {
       resolve(response.data);
     })
@@ -108,7 +144,7 @@ export function get(url,params={}){
 
 export function put(url,data = {}){
   return new Promise((resolve,reject) => {
-    axios.put(url,data)
+    ajax.put(url,data)
          .then(response => {
            resolve(response.data);
          },err => {

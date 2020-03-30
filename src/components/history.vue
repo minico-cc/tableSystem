@@ -9,9 +9,16 @@
                 @click="handleDownload"
             >导出选中项</el-button>
 
+            <el-button
+                style="margin-bottom:20px"
+                type="primary"
+                icon="el-icon-document"
+                @click="handleDownloadAll"
+            >导出所有</el-button>
+
             <!-- 搜索框 -->
             <el-input
-                v-model="filename"
+                v-model="searchInfo"
                 placeholder="请输入搜索内容"
                 style="width:350px;"
                 prefix-icon="el-icon-document"
@@ -29,19 +36,31 @@
             @selection-change="handleSelectionChange"
         >
             <el-table-column type="selection" align="center" />
-            <el-table-column prop="id" align="center" label="Id" width="50"></el-table-column>
-            <el-table-column prop="date" label="日期" width="100" align="center"></el-table-column>
-            <el-table-column prop="production" label="咨询产品" width="110" align="center"></el-table-column>
-            <el-table-column prop="service" label="服务来源" width="115" align="center"></el-table-column>
-            <el-table-column prop="date1" label="来源时间" width="115" align="center" v-if="false"></el-table-column>
-            <el-table-column prop="serviceName" label="名称" width="115" align="center"></el-table-column>
-            <el-table-column prop="name" label="姓名" width="115" align="center"></el-table-column>
-            <el-table-column prop="career" label="职位" width="115" align="center" v-if="false"></el-table-column>
-            <el-table-column prop="company" label="分公司" width="115" align="center"></el-table-column>
-            <el-table-column prop="type" label="服务类型" width="115" align="center"></el-table-column>
-            <el-table-column prop="desc" label="具体描述" width="115" align="center" v-if="false"></el-table-column>
-            <el-table-column prop="solve" label="是否解决" width="90" align="center"></el-table-column>
-            <el-table-column prop="replyTime" label="回复时间" width="115" align="center"></el-table-column>
+            <!-- <el-table-column prop="id" align="center" label="Id" width="50"></el-table-column> -->
+            <el-table-column prop="createTime" label="日期" width="110" align="center"></el-table-column>
+            <el-table-column prop="productName" label="咨询产品" width="110" align="center"></el-table-column>
+            <el-table-column prop="serviceSource" label="服务来源" width="115" align="center"></el-table-column>
+            <!-- <el-table-column prop="date1" label="来源时间" width="115" align="center" v-if="false"></el-table-column> -->
+            <el-table-column prop="serverName" label="名称" width="150" align="center"></el-table-column>
+            <el-table-column prop="clientName" label="姓名" width="115" align="center"></el-table-column>
+            <el-table-column
+                prop="clientPosition"
+                label="职位"
+                width="115"
+                align="center"
+                v-if="false"
+            ></el-table-column>
+            <el-table-column prop="clientCompany" label="分公司" width="115" align="center"></el-table-column>
+            <el-table-column prop="serviceType" label="服务类型" width="140" align="center"></el-table-column>
+            <el-table-column
+                prop="detailContent"
+                label="具体描述"
+                width="115"
+                align="center"
+                v-if="false"
+            ></el-table-column>
+            <el-table-column prop="status" label="是否解决" width="90" align="center"></el-table-column>
+            <el-table-column prop="deadline" label="回复时间" width="115" align="center"></el-table-column>
             <el-table-column fixed="right" label="操作" width="100">
                 <template slot-scope="scope">
                     <el-button @click="handleClick(scope.row)" type="text" size="small">详情</el-button>
@@ -50,107 +69,35 @@
             </el-table-column>
         </el-table>
 
+        <!-- 分页 -->
+        <el-pagination
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+            :current-page="currentPage"
+            :page-sizes="[10]"
+            :page-size="pageSize"
+            layout="total, sizes, prev, pager, next, jumper"
+            :total="totalItems"
+        ></el-pagination>
+
         <!-- 查看弹出框 -->
         <el-dialog title="详情" :visible.sync="dialogVisible" width="25%">
-            <p>日期：{{detail.date}}</p>
-            <p>咨询产品：{{detail.production}}</p>
-            <p>服务来源：{{detail.service}}</p>
-            <p>来源时间：{{detail.date1}}</p>
-            <p>名称：{{detail.serviceName}}</p>
-            <p>姓名：{{detail.name}}</p>
-            <p>职位：{{detail.career}}</p>
-            <p>分公司：{{detail.company}}</p>
-            <p>服务类型：{{detail.type}}</p>
-            <p>具体描述：{{detail.desc}}</p>
-            <p>是否解决：{{detail.solve}}</p>
-            <p v-if="this.detail.solve == false">回复时间：{{detail.replyTime}}</p>
+            <p>日期：{{detail.createTime}}</p>
+            <p>咨询产品：{{detail.productName}}</p>
+            <p>服务来源：{{detail.serviceSource}}</p>
+            <!-- <p>来源时间：{{detail.date1}}</p> -->
+            <p>名称：{{detail.serverName}}</p>
+            <p>姓名：{{detail.clientName}}</p>
+            <p>职位：{{detail.clientPosition}}</p>
+            <p>分公司：{{detail.clientCompany}}</p>
+            <p>服务类型：{{detail.serviceType}}</p>
+            <p>具体描述：{{detail.detailContent}}</p>
+            <p>是否解决：{{detail.status}}</p>
+            <p v-if="this.detail.status == false">回复时间：{{detail.deadline}}</p>
             <span slot="footer" class="dialog-footer">
                 <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
             </span>
         </el-dialog>
-
-        <!-- 编辑弹出框 -->
-        <!-- <el-dialog title="编辑" :visible.sync="dialogFormVisible">
-            <el-form :model="ruleForm" :rules="rules" ref="ruleForm">
-                <el-form-item label="日期" prop="date" :label-width="formLabelWidth">
-                    <el-col :span="11">
-                        <el-form-item prop="date">
-                            <el-date-picker
-                                type="date"
-                                placeholder="选择日期"
-                                v-model="ruleForm.date"
-                                style="width: 100%;"
-                            ></el-date-picker>
-                        </el-form-item>
-                    </el-col>
-                </el-form-item>
-                <el-form-item label="咨询产品" prop="production" :label-width="formLabelWidth">
-                    <el-input v-model="ruleForm.production"></el-input>
-                </el-form-item>
-                <el-form-item label="服务来源" prop="service" :label-width="formLabelWidth">
-                    <el-select v-model="ruleForm.service" placeholder="请选择服务来源">
-                        <el-option label="产品服务中台_oa" value="oa"></el-option>
-                        <el-option label="84710000热线" value="phone"></el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="来源时间" required :label-width="formLabelWidth">
-                    <el-col :span="11">
-                        <el-form-item prop="date1">
-                            <el-date-picker
-                                type="datetime"
-                                placeholder="选择日期时间"
-                                v-model="ruleForm.date1"
-                                default-time="12:00:00"
-                                style="width: 100%;"
-                            ></el-date-picker>
-                        </el-form-item>
-                    </el-col>
-                </el-form-item>
-                <el-form-item label="名称" prop="serviceName" :label-width="formLabelWidth">
-                    <el-input v-model="ruleForm.serviceName"></el-input>
-                </el-form-item>
-                <el-form-item label="姓名" prop="name" :label-width="formLabelWidth">
-                    <el-input v-model="ruleForm.name"></el-input>
-                </el-form-item>
-                <el-form-item label="职位" prop="career" :label-width="formLabelWidth">
-                    <el-input v-model="ruleForm.career"></el-input>
-                </el-form-item>
-                <el-form-item label="分公司" prop="company" :label-width="formLabelWidth">
-                    <el-input v-model="ruleForm.company"></el-input>
-                </el-form-item>
-                <el-form-item label="服务类型" prop="type" :label-width="formLabelWidth">
-                    <el-cascader
-                        :options="options"
-                        clearable
-                        :props="{ expandTrigger: 'hover' }"
-                        v-model="ruleForm.type"
-                    ></el-cascader>
-                </el-form-item>
-                <el-form-item label="具体内容" prop="desc" :label-width="formLabelWidth">
-                    <el-input type="textarea" v-model="ruleForm.desc"></el-input>
-                </el-form-item>
-                <el-form-item label="是否解决" prop="solve" :label-width="formLabelWidth">
-                    <el-switch v-model="ruleForm.solve"></el-switch>
-                </el-form-item>
-                <el-form-item
-                    label="回复时间"
-                    prop="replytTime"
-                    v-if="this.ruleForm.solve == false"
-                    :label-width="formLabelWidth"
-                >
-                    <el-date-picker
-                        type="datetime"
-                        placeholder="选择日期时间"
-                        v-model="ruleForm.replytTime"
-                        default-time="12:00:00"
-                    ></el-date-picker>
-                </el-form-item>
-            </el-form>
-            <div slot="footer" class="dialog-footer">
-                <el-button @click="dialogFormVisible = false">取 消</el-button>
-                <el-button type="primary" @click="confirmEdit('ruleForm')">确 定</el-button>
-            </div>
-        </el-dialog> -->
     </div>
 </template>
 
@@ -161,88 +108,72 @@ export default {
     name: "exportExcel",
     data() {
         return {
-            list: [
-                {
-                    id:1,
-                    date: "Sun Feb 09 2020 18:07:51 GMT+0800 (中国标准时间)",
-                    service: "oa",
-                    name: "test",
-                    serviceName: "test",
-                    production: "test",
-                    career: "test",
-                    company: "成都分公司/公司领导",
-                    desc: "test",
-                    solve: "未解决",
-                    date1: "Tue Feb 18 2020 12:00:00 GMT+0800 (中国标准时间)",
-                    type: ["其他"],
-                    replyTime: "Fri Feb 14 2020 12:00:00 GMT+0800 (中国标准时间)"
-                },
-                {
-                    id:2,
-                    date: "Sun Feb 09 2020 18:07:51 GMT+0800 (中国标准时间)",
-                    service: "oa",
-                    name: "test",
-                    serviceName: "test",
-                    production: "test",
-                    career: "test",
-                    company: "成都分公司/公司领导",
-                    desc: "test",
-                    solve: "已解决",
-                    date1: "Tue Feb 18 2020 12:00:00 GMT+0800 (中国标准时间)",
-                    type: ["其他"],
-                    replyTime: ""
-                },
-                {
-                    id:3,
-                    date: "Sun Feb 09 2020 18:07:51 GMT+0800 (中国标准时间)",
-                    service: "oa",
-                    name: "test",
-                    serviceName: "test",
-                    production: "test",
-                    career: "test",
-                    company: "成都分公司/公司领导",
-                    desc: "test",
-                    solve: "未解决",
-                    date1: "Tue Feb 18 2020 12:00:00 GMT+0800 (中国标准时间)",
-                    type: ["其他"],
-                    replyTime: "Fri Feb 14 2020 12:00:00 GMT+0800 (中国标准时间)"
-                }
-            ],
+            list: [],
+            listAll: [],
             listLoading: false,
             multipleSelection: [],
             downloadLoading: false,
-            filename: "",
+            searchInfo: "",
             dialogVisible: false,
             detail: "",
             dialogFormVisible: false,
+            currentPage: 1,
+            pageSize: 10,
+            totalItems: 0,
             ruleForm: {
-                date: "",
-                service: "",
-                name: "",
-                serviceName: "",
-                production: "",
-                career: "",
-                company: "",
-                desc: "",
-                solve: false,
-                date1: "",
-                type: "",
-                replytTime: ""
+                createTime: "",
+                serviceSource: "",
+                clientName: "",
+                serverName: "",
+                productName: "",
+                clientPosition: "",
+                clientCompany: "",
+                detailContent: "",
+                status: false,
+                // date1: "",
+                serviceType: "",
+                deadline: ""
             },
             formLabelWidth: "120px"
         };
     },
-    //     created() {
-    //     this.fetchData()
-    //   },
+    created() {
+        this.getHistory();
+    },
     methods: {
-        //     fetchData() {
-        //   this.listLoading = true
-        //   fetchList(this.listQuery).then(response => {
-        //     this.list = response.data.items
-        //     this.listLoading = false
-        //   })
-        // },
+        getHistory() {
+            this.listLoading = true;
+            this.$post("/getSrvOrder", {
+                pageNo: this.currentPage,
+                pageSize: this.pageSize,
+                status: 1
+            })
+                .then(response => {
+                    console.log(response.data);
+                    if (response.code == 1000) {
+                        this.list = response.data.serviceOrderList;
+                        // this.currentPage = response.data.number;
+                        this.totalItems = response.data.totalRecord;
+                        console.log(this.list);
+                        this.listLoading = false;
+                    } else {
+                        this.$message({
+                            message: response.msg,
+                            type: "error"
+                        });
+                    }
+                })
+                .catch(err => {
+                    console.log(err);
+                    this.listLoading = false;
+                    this.$message({
+                        message: "请求数据失败",
+                        type: "error"
+                    });
+                });
+        },
+
+        //导出选中
         handleSelectionChange(val) {
             this.multipleSelection = val;
         },
@@ -250,12 +181,11 @@ export default {
             if (this.multipleSelection.length) {
                 this.downloadLoading = true;
                 import("@/vendor/Export2Excel").then(excel => {
-                    const tHeader = [
-                        "Id",
+                    const tHeader = [                       
                         "日期",
                         "咨询产品",
                         "服务来源",
-                        "来源时间",
+                        // "来源时间",
                         "名称",
                         "姓名",
                         "职位",
@@ -266,19 +196,18 @@ export default {
                         "回复时间"
                     ];
                     const filterVal = [
-                        "Id",
-                        "date",
-                        "production",
-                        "production",
-                        "data1",
-                        "serviceName",
-                        "name",
-                        "career",
-                        "company",
-                        "type",
-                        "desc",
-                        "solve",
-                        "replyTime"
+                        "createTime",
+                        "productName",
+                        "serviceSource",
+                        // "serverName",
+                        "serverName",
+                        "clientName",
+                        "clientPosition",
+                        "clientCompany",
+                        "serviceType",
+                        "detailContent",
+                        "status",
+                        "deadline"
                     ];
                     const list = this.multipleSelection;
                     const data = this.formatJson(filterVal, list);
@@ -300,38 +229,133 @@ export default {
         formatJson(filterVal, jsonData) {
             return jsonData.map(v => filterVal.map(j => v[j]));
         },
+
+        //导出所有
+
+        handleDownloadAll() {
+            this.$pppost("/exportSrvOrder", {}, {responseType: "blob"})
+                .then(response => {
+                    let blob = response;
+                    let reader = new FileReader();
+                    reader.readAsDataURL(blob);
+                    reader.onload = e => {
+                        let a = document.createElement("a");
+                        a.download = `历史工单（总）.xlsx`;
+                        a.href = e.target.result;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                    };
+                })
+                .catch(err => {
+                    console.log(err);
+                    this.listLoading = false;
+                    this.$message({
+                        message: "请求数据失败",
+                        type: "error"
+                    });
+                });
+        },
+
+        // handleDownload() {
+
+        //     if (this.multipleSelection.length) {
+        //         this.downloadLoading = true;
+        //         import("@/vendor/Export2Excel").then(excel => {
+        //             const tHeader = [
+        //                 "Id",
+        //                 "日期",
+        //                 "咨询产品",
+        //                 "服务来源",
+        //                 // "来源时间",
+        //                 "名称",
+        //                 "姓名",
+        //                 "职位",
+        //                 "分公司",
+        //                 "服务类型",
+        //                 "内容描述",
+        //                 "是否解决",
+        //                 "回复时间"
+        //             ];
+        //             const filterVal = [
+        //                 "id",
+        //                 "createTime",
+        //                 "productName",
+        //                 "serviceSource",
+        //                 // "serverName",
+        //                 "serverName",
+        //                 "clientName",
+        //                 "clientPosition",
+        //                 "clientCompany",
+        //                 "serviceType",
+        //                 "detailContent",
+        //                 "status",
+        //                 "deadline"
+        //             ];
+        //             const list = this.multipleSelection;
+        //             const data = this.formatJson(filterVal, list);
+        //             excel.export_json_to_excel({
+        //                 header: tHeader,
+        //                 data,
+        //                 filename: this.filename
+        //             });
+        //             this.$refs.multipleTable.clearSelection();
+        //             this.downloadLoading = false;
+        //         });
+        //     } else {
+        //         this.$message({
+        //             message: "请至少选择一项！",
+        //             type: "warning"
+        //         });
+        //     }
+        // },
+        // formatJson(filterVal, jsonData) {
+        //     return jsonData.map(v => filterVal.map(j => v[j]));
+        // },
+
+        //详情
         handleClick(row) {
             this.dialogVisible = true;
             this.detail = row;
         },
-        // editClick(row) {
-        //     this.dialogFormVisible = true;
-        //     this.ruleForm = row;
-        //     console.log(row);
-        // },
-        // confirmEdit(formName) {
-        //     console.log(formName)
-        //             console.log(this.ruleForm);
-        //     this.$refs[formName].validate(valid => {
-        //         if (valid) {
-        //             console.log(this.ruleForm);
-        //             this.$message({
-        //                 message: "提交成功!",
-        //                 type: "success"
-        //             });
-        //     this.dialogFormVisible = false;
-        //         } else {
-        //             this.$message({
-        //                 message: "提交失败，请确认信息填写完整!",
-        //                 type: "warning"
-        //             });
-        //             return false;
-        //         }
-        //     });
-        // },
         //搜索
         doFilter() {
-
+            console.log(this.searchInfo);
+            this.$post("/getSrvOrder", {
+                page: this.currentPage,
+                size: this.pageSize,
+                queryCond: this.searchInfo,
+                status: 1
+            })
+                .then(response => {
+                    console.log(response);
+                    if (response.code == 1000) {
+                        this.list = response.data.serviceOrderList;
+                        // this.currentPage = response.data.number;
+                        this.totalItems = response.data.totalRecord;
+                    } else {
+                        this.$message({
+                            message: response.msg,
+                            type: "error"
+                        });
+                    }
+                })
+                .catch(err => {
+                    console.log(err);
+                    this.$message({
+                        message: "请求数据失败",
+                        type: "error"
+                    });
+                });
+        },
+        handleSizeChange(val) {
+            // console.log(`每页 ${val} 条`);
+            this.pageSize = val;
+        },
+        handleCurrentChange(val) {
+            // console.log(`当前页: ${val}`);
+            this.currentPage = val;
+            this.getHistory();
         }
     }
 };
@@ -342,5 +366,4 @@ export default {
 .table-head .el-input {
     float: right;
 }
-
 </style>
